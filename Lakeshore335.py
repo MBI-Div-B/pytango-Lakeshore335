@@ -35,12 +35,12 @@ class Lakeshore335(Device):
         doc="output 1 or 2"
     )
 
-    inputA = attribute(label="input A", dtype=float, unit="K",
+    inputa = attribute(label="input A", dtype=float, unit="K",
                          display_level=DispLevel.OPERATOR,
                          access=AttrWriteType.READ,
                          doc="input A temperature",)
     
-    inputB = attribute(label="input B", dtype=float, unit="K",
+    inputb = attribute(label="input B", dtype=float, unit="K",
                          display_level=DispLevel.OPERATOR,
                          access=AttrWriteType.READ,
                          doc="input B temperature",)
@@ -82,10 +82,10 @@ class Lakeshore335(Device):
             self.info_stream("Initialised on port {:s}".format(self.con.port))
 
     # attributes
-    def read_inputA(self):
+    def read_inputa(self):
         return float(self.write("KRDG?A"))
 
-    def read_inputB(self):
+    def read_inputb(self):
         return float(self.write("KRDG?B"))
 
     def read_output(self):
