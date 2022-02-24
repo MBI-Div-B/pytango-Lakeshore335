@@ -80,6 +80,9 @@ class Lakeshore335(Device):
         if self.con.isOpen():
             self.set_state(DevState.ON)
             self.info_stream("Initialised on port {:s}".format(self.con.port))
+            self.info_stream("Connected to device {:s}".format(self.write("*IDN?")))
+        else:
+            self.error_stream("Cannot connect on port {:s}".format(self.con.port))
 
     # attributes
     def read_inputa(self):
