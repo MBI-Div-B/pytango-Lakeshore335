@@ -18,42 +18,46 @@ class HeaterRange(IntEnum):
 
 
 class Lakeshore335(Device):
+    Port = device_property(dtype=str, default_value="/dev/ttyLakeshore")
 
-    Port = device_property(
-        dtype=str,
-        default_value='/dev/ttyLakeshore'
+    Baudrate = device_property(dtype=int, default_value=57600)
+
+    Output = device_property(dtype=int, default_value=1, doc="output 1 or 2")
+
+    inputa = attribute(
+        label="input A",
+        dtype=float,
+        unit="K",
+        display_level=DispLevel.OPERATOR,
+        access=AttrWriteType.READ,
+        doc="input A temperature",
     )
-    
-    Baudrate = device_property(
+
+    inputb = attribute(
+        label="input B",
+        dtype=float,
+        unit="K",
+        display_level=DispLevel.OPERATOR,
+        access=AttrWriteType.READ,
+        doc="input B temperature",
+    )
+
+    output = attribute(
+        label="output",
         dtype=int,
-        default_value=57600
-    )
-    
-    Output = device_property(
-        dtype=int,
-        default_value=1,
-        doc="output 1 or 2"
+        display_level=DispLevel.OPERATOR,
+        access=AttrWriteType.READ,
+        doc="output",
     )
 
-    inputa = attribute(label="input A", dtype=float, unit="K",
-                         display_level=DispLevel.OPERATOR,
-                         access=AttrWriteType.READ,
-                         doc="input A temperature",)
-    
-    inputb = attribute(label="input B", dtype=float, unit="K",
-                         display_level=DispLevel.OPERATOR,
-                         access=AttrWriteType.READ,
-                         doc="input B temperature",)
-
-    output = attribute(label="output", dtype=int,
-                         display_level=DispLevel.OPERATOR,
-                         access=AttrWriteType.READ,
-                         doc="output",)
-
-    setpoint = attribute(label="setpoint", dtype=float, unit="K",
-                         display_level=DispLevel.OPERATOR,
-                         access=AttrWriteType.READ_WRITE,
-                         doc="setpoint",)
+    setpoint = attribute(
+        label="setpoint",
+        dtype=float,
+        unit="K",
+        display_level=DispLevel.OPERATOR,
+        access=AttrWriteType.READ_WRITE,
+        doc="setpoint",
+    )
 
     heater_range = attribute(
         dtype=HeaterRange,
@@ -63,7 +67,8 @@ class Lakeshore335(Device):
     )
 
     heater_output = attribute(
-        dtype=float, unit="%",
+        dtype=float,
+        unit="%",
         format="%4.1f",
         label="heater output",
         access=AttrWriteType.READ,
@@ -72,10 +77,15 @@ class Lakeshore335(Device):
 
     def init_device(self):
         Device.init_device(self)
-        
-        self.con = Serial(port=self.Port, baudrate=self.Baudrate,
-                          timeout=3, parity=PARITY_ODD,
-                          stopbits=STOPBITS_ONE, bytesize=7)
+
+        self.con = Serial(
+            port=self.Port,
+            baudrate=self.Baudrate,
+            timeout=3,
+            parity=PARITY_ODD,
+            stopbits=STOPBITS_ONE,
+            bytesize=7,
+        )
 
         if self.con.isOpen():
             self.set_state(DevState.ON)
@@ -110,8 +120,12 @@ class Lakeshore335(Device):
         return float(self.write("HTR? {:d}".format(self.Output)))
 
     # commands
-    @command(dtype_in=str, doc_in="enter a command",
-             dtype_out=str, doc_out="response from a query")
+    @command(
+        dtype_in=str,
+        doc_in="enter a command",
+        dtype_out=str,
+        doc_out="response from a query",
+    )
     def write(self, cmd):
         self.debug_stream(cmd)
         cmd = cmd + "\r\n"
@@ -131,7 +145,7 @@ class Lakeshore335(Device):
         else:
             self.warning_stream("Inout must be 0=None, 1=Input A, 2=Input B")
 
-    @command(dtype_in=(float, ), doc_in="ramp enable 0/1 and rate in K/min")
+    @command(dtype_in=(float,), doc_in="ramp enable 0/1 and rate in K/min")
     def ramp(self, value):
         enable, ramp = value
         self.write("OUTMODE {:d},{:d},{:f}".format(self.Output, int(enable), abs(ramp)))
